@@ -7,15 +7,14 @@ public class BucketSolution
 {
 	public static void main(String[] args)
 	{
-		getVolumeAtIndex(20, 2, 8);
+		getVolumeAtIndex(1000, 15, 4);
 	}
 
 	static void getVolumeAtIndex(float volume, float maxCapacity, int searchIndex)
 	{
-
+		Map<Integer, Bucket> buckets = new HashMap<Integer, Bucket>();
 		if (volume > 0 && searchIndex > 0)
 		{
-			Map<Integer, Bucket> buckets = new HashMap<Integer, Bucket>();
 			Bucket root = new BucketSolution().new Bucket();
 			root.setIndex(1);
 			root.setLevel(1);
@@ -38,52 +37,40 @@ public class BucketSolution
 		else
 			System.out.println("Bucket " + searchIndex + " has volume 0");
 
+		float sum = 0;
+		for (Bucket bucket : buckets.values())
+		{
+			sum = sum + bucket.getCurrrentVolume();
+			System.out.println("Bucket at index " + bucket.getIndex() + " has volume " + bucket.getCurrrentVolume());
+		}
+
+		System.out.println("Total : " + sum);
+
 	}
 
 	static void fillBuckets(float volume, float maxCapacity, Bucket root, Map<Integer, Bucket> buckets)
 	{
-		float remainingVolume = volume;
-		if (remainingVolume > 0)
+		if (volume > 0)
 		{
-			if (remainingVolume > maxCapacity)
+			if (volume > maxCapacity)
 			{
-				fillChilds(maxCapacity, root, buckets, remainingVolume);
+				fillChildren(maxCapacity, root, buckets, volume);
 			}
 			else
 			{
-				fillLeafNode(maxCapacity, root, buckets, remainingVolume);
+				root.setVolume(volume);
 			}
-
 		}
 	}
 
-	private static void fillLeafNode(float maxCapacity, Bucket root, Map<Integer, Bucket> buckets, float remainingVolume)
+	private static void fillChildren(float maxCapacity, Bucket root, Map<Integer, Bucket> buckets, float volume)
 	{
-		if (root.getCurrrentVolume() == 0)
-		{
-			// No child needed as no spill over
-			System.out.println("Filling bucket " + root.getIndex() + " with volume " + remainingVolume);
-			root.setVolume(remainingVolume);
-		}
-		else if (root.getCurrrentVolume() + remainingVolume <= maxCapacity)
-		{
-			System.out.println("Filling bucket " + root.getIndex() + " with volume " + (root.getCurrrentVolume() + remainingVolume));
-			root.setVolume(root.getCurrrentVolume() + remainingVolume);
-		}
-		else // current volume plus remaining exceeds bucket capacity
-		{
-			fillChilds(maxCapacity, root, buckets, root.getCurrrentVolume() + remainingVolume);
-		}
-	}
-
-	private static void fillChilds(float maxCapacity, Bucket root, Map<Integer, Bucket> buckets, float remainingVolume)
-	{
-		System.out.println("Filling bucket " + root.getIndex() + " with remaining volume " + remainingVolume);
-
-		// Take in to account if there is a spill from one parent already
-		remainingVolume = remainingVolume - (maxCapacity - root.getCurrrentVolume());
-
+		// Assumes that when calling this method volume is more than maxCapacity
 		root.setVolume(maxCapacity);
+
+		float remainingVolume = volume - maxCapacity;
+		float volumeLeft = remainingVolume / 2;
+		float volumeRight = remainingVolume / 2;
 
 		// Create children to evenly distribute remainingVolume
 		int nextLeftNodeIndex = root.getLevel() + root.getIndex();
@@ -93,44 +80,44 @@ public class BucketSolution
 		if (buckets.get(nextLeftNodeIndex) != null)
 		{
 			leftChild = buckets.get(nextLeftNodeIndex);
+			volumeLeft = volumeLeft + leftChild.getCurrrentVolume();
 		}
 		else
 		{
 			leftChild = new BucketSolution().new Bucket();
 			leftChild.setIndex(nextLeftNodeIndex);
 			leftChild.setLevel(root.getLevel() + 1);
+			buckets.put(leftChild.getIndex(), leftChild);
 		}
-		buckets.put(leftChild.getIndex(), leftChild);
 
 		Bucket rightChild;
 		if (buckets.get(nextRightNodeIndex) != null)
 		{
 			rightChild = buckets.get(nextRightNodeIndex);
+			volumeRight = volumeRight + rightChild.getCurrrentVolume();
 		}
 		else
 		{
 			rightChild = new BucketSolution().new Bucket();
 			rightChild.setIndex(nextRightNodeIndex);
 			rightChild.setLevel(root.getLevel() + 1);
+			buckets.put(rightChild.getIndex(), rightChild);
 		}
-		buckets.put(rightChild.getIndex(), rightChild);
 
 		root.setLeft(leftChild);
 		root.setRight(rightChild);
 
-		if (remainingVolume / 2 > maxCapacity)
-		{
+		if (volumeLeft > maxCapacity)
 			// fill left tree
-			fillBuckets(remainingVolume / 2, maxCapacity, leftChild, buckets);
-
-			// fill right tree
-			fillBuckets(remainingVolume / 2, maxCapacity, rightChild, buckets);
-		}
+			fillBuckets(volumeLeft, maxCapacity, leftChild, buckets);
 		else
-		{
-			fillLeafNode(maxCapacity, leftChild, buckets, remainingVolume / 2);
-			fillLeafNode(maxCapacity, rightChild, buckets, remainingVolume / 2);
-		}
+			leftChild.setVolume(volumeLeft);
+
+		if (volumeRight > maxCapacity)
+			// fill right tree
+			fillBuckets(volumeRight, maxCapacity, rightChild, buckets);
+		else
+			rightChild.setVolume(volumeRight);
 
 	}
 
