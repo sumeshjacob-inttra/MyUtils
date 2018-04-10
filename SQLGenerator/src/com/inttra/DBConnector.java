@@ -11,9 +11,9 @@ public class DBConnector
 {
 	static Connection			connection				= null;
 	static PreparedStatement	stmt					= null;
-	static String				DB_USER					= "inttraro";
-	static String				DB_PASSWORD				= "inttraro";
-	static String				DB_URL					= "jdbc:oracle:thin:" + DB_USER + "/" + DB_PASSWORD + "@//172.17.2.20:1521/PROD.NJ.INTTRA.COM";
+	static String				DB_USER					= "XXXXXXXXXXXXXXX";
+	static String				DB_PASSWORD				= "XXXXXXXXXXXXXXXXX";
+	static String				DB_URL					= "jdbc:oracle:thin:" + DB_USER + "/" + DB_PASSWORD + "@//URL:1521/SID";
 	static String				CHECK_CHAPTER			= "select * from inttra.hs_chapter where chapter_code=?";
 	static String				CHECK_SUB_CHAPTER		= "select * from inttra.hs_sub_chapter where sub_chapter_code=?";
 	static String				CHECK_HS_CODE			= "select * from inttra.hs_code where hs_code=?";
