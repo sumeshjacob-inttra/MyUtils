@@ -1,0 +1,104 @@
+package com.sumesh;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class LRUCache
+{
+	int					capacity;
+	Map<Integer, Node>	map		= new HashMap<Integer, Node>();
+	Node				head	= null;
+	Node				tail	= null;
+
+	public LRUCache(int capacity)
+	{
+		this.capacity = capacity;
+	}
+
+	public int get(int searchValue)
+	{
+		int value = -1;
+		if (map.containsKey(searchValue))
+		{
+			Node n = map.get(searchValue);
+			remove(n);
+			setHead(n);
+			value = searchValue;
+		}
+
+		return value;
+	}
+
+	public void remove(Node node)
+	{
+		if (node.left != null)
+		{
+			node.left.right = node.right;
+		}
+		else
+		{
+			head = node.right;
+		}
+
+		if (node.right != null)
+		{
+			node.right.left = node.left;
+		}
+		else
+		{
+			tail = node.left;
+		}
+	}
+
+	public void setHead(Node node)
+	{
+		node.right = head;
+		node.left = null;
+
+		if (head != null)
+			head.left = node;
+
+		head = node;
+
+		if (tail == null)
+			tail = head;
+	}
+
+	public void put(int value)
+	{
+		if (map.containsKey(value))
+		{
+			Node old = map.get(value);
+			remove(old);
+			setHead(old);
+		}
+		else
+		{
+			Node created = new Node(value);
+			if (map.size() == capacity)
+			{
+				remove(tail);
+				setHead(created);
+				map.remove(tail.value);
+			}
+			else
+			{
+				setHead(created);
+			}
+
+			map.put(value, created);
+		}
+	}
+}
+
+class Node
+{
+	int		value;
+	Node	left;
+	Node	right;
+
+	public Node(int value)
+	{
+		this.value = value;
+	}
+}
